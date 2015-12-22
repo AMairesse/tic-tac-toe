@@ -21,43 +21,60 @@ class Player():
 	W = None
 	b = None
 	initial_position = None
-	name = None
+	sess = None
 	
-	def __init__(self, name):
-		self.W = tf.Variable(np.random.rand(9,9))
-		self.b = tf.Variable(np.random.rand(9))
+	def __init__(self, session):
+		self.W = tf.Variable(tf.zeros([9,9], tf.float64))
+		self.b = tf.Variable(tf.zeros([9], tf.float64))
 		self.initial_position = tf.placeholder(tf.float64, shape=(1, 9))
-		self.name = name
+		self.sess = session
 
-	def load_player(self):
-		pass
+	def init_from_random(self):
+		op = self.W.assign(np.random.rand(9,9))
+		self.sess.run(op)
+		op = self.b.assign(np.random.rand(9))
+		self.sess.run(op)
+
+	def init_from_parents(self, player1, player2):
+		op = self.W.assign((player1.W + player2.W) / 2.0)
+		self.sess.run(op)
+		op = self.b.assign((player1.b + player2.b) / 2.0)
+		self.sess.run(op)
 
 	def play(self, board):
-		init = tf.initialize_all_variables()
 		# Position played is a softmax regression of ( (W * initial_position) + b)
 		played = tf.nn.softmax(tf.matmul(self.initial_position, self.W) + self.b)
-		with tf.Session() as sess:
-			sess.run(init, feed_dict={self.initial_position: board})
-			result = sess.run(played, feed_dict={self.initial_position: board})
+		result = self.sess.run(played, feed_dict={self.initial_position: board})
 		move = result.argmax()
 		x = (int)(move / 3)
 		y = move%3
 		return (x, y)
 
 
+
+
 def main ():
 	from tictactoe import TicTacToe
 	board = TicTacToe()
 
+	# Create a TensorFlow session
+	session = tf.InteractiveSession()
+
 	# Create two players
-	player1 = Player("First")
-	player2 = Player("Second")
+	player1 = Player(session)
+	player1.init_from_random()
+	player2 = Player(session)
+	player2.init_from_random()
 
 	# Play
 	(winner, result) = board.autoPlay(player1, player2)
 		
 	board.display()
 	print (result)
+
+	child = Player(session)
+	child.init_from_parents(player1, player2)
+
 
 
 if __name__ == "__main__":
