@@ -7,13 +7,6 @@ from __future__ import print_function
 import tensorflow as tf
 import numpy as np
 
-class ClassName(object):
-	"""docstring for ClassName"""
-	def __init__(self, arg):
-		super(ClassName, self).__init__()
-		self.arg = arg
-		
-
 class Player():
 	"""docstring for Player"""
 
@@ -49,43 +42,3 @@ class Player():
 		x = (int)(move / 3)
 		y = move%3
 		return (x, y)
-
-
-
-
-def main ():
-	from tictactoe import TicTacToe
-	board = TicTacToe()
-
-	# Create a TensorFlow session
-	session = tf.InteractiveSession()
-
-	# Create a generation of players (each with a score)
-	generation = []
-	for x in xrange(1,10):
-		player = Player(session)
-		player.init_from_random()
-		generation.append([player, 0])
-
-	# Everyone plays against each other
-	# Winner earn a point
-	for x in xrange(0,generation.__len__()):
-		for y in xrange(x+1,generation.__len__()):
-			board.clear()
-			(winner, result) = board.autoPlay(generation[x][0], generation[y][0])
-			board.display()
-			print(result)
-			if winner == generation[x][0]:
-				generation[x][1] = generation[x][1] + 1
-			else:
-				generation[y][1] = generation[y][1] + 1
-
-	# Display results
-	for x in xrange(0,generation.__len__()):
-		print ("Player n°", x, "scores ", generation[x][1])
-
-	#child = Player(session)
-	#child.init_from_parents(player1, player2)
-
-if __name__ == "__main__":
-	main()
