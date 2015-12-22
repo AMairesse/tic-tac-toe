@@ -13,23 +13,44 @@ class TicTacToe():
 			 [0,0,0],
 			 [0,0,0]]
 
+	# Clear the board for a new game
 	def clear(self):
 		self.board = [[0,0,0],
 					  [0,0,0],
 					  [0,0,0]]
 
-	def play(self, player, x, y):
+	# Autoplay two AI and return the winner (and the win condition)
+	def autoPlay(self, playerX, playerO):
+		while True:
+			# Player 'X' plays
+			(x, y) = playerX.play(self.readBoard())
+			valid_move = self.play('X', x, y)
+			if not valid_move:
+				return (playerO, "X made an invalid move")
+			elif self.isThereWinner() != None :
+				return (playerX, "Game won by X")
+			# Player 'O' plays
+			(x, y) = playerO.play(self.readBoard())
+			valid_move = self.play('O', x, y)
+			if not valid_move:
+				return (playerX, "O made an invalid move")
+			elif self.isThereWinner() != None :
+				return (playerO, "Game won by O")
+
+	# Make a move on the board
+	def play(self, sign, x, y):
 		# Check first if the spot if free
 		if self.board[x][y] != 0:
 			return False
-		if player == 'X':
+		if sign == 'X':
 			self.board[x][y] = 1
-		elif player == 'O':
+		elif sign == 'O':
 			self.board[x][y] = -1
 		else:
 			return False
 		return True
 
+	# Print the board on the screen
 	def display(self):
 		print("_______")
 		for x in range(3):
@@ -44,11 +65,13 @@ class TicTacToe():
 			print ("|")
 		print("-------")
 
+	# Export the board in a single row (for AI players)
 	def readBoard(self):
-		return {self.board[0][0], self.board[0][1], self.board[0][2],
-				self.board[1][0], self.board[1][1], self.board[1][2],
-				self.board[2][0], self.board[2][1], self.board[2][2]}
+		return ([[self.board[0][0], self.board[0][1], self.board[0][2],
+				  self.board[1][0], self.board[1][1], self.board[1][2],
+				  self.board[2][0], self.board[2][1], self.board[2][2]]])
 
+	# Check if there is a winner and return which sign won
 	def isThereWinner(self):
 		# Lines
 		for x in range(3):
@@ -77,16 +100,3 @@ class TicTacToe():
 			return('O')
 		# There is no winner
 		return(None)
-
-
-def main ():
-	game = TicTacToe()
-	game.play('O', 0, 0)
-	game.play('O', 0, 1)
-	game.play('O', 0, 2)
-	game.display()
-	print ("Winner is : ", game.isThereWinner())
-
-
-if __name__ == "__main__":
-	main()
