@@ -60,22 +60,32 @@ def main ():
 	# Create a TensorFlow session
 	session = tf.InteractiveSession()
 
-	# Create two players
-	player1 = Player(session)
-	player1.init_from_random()
-	player2 = Player(session)
-	player2.init_from_random()
+	# Create a generation of players (each with a score)
+	generation = []
+	for x in xrange(1,10):
+		player = Player(session)
+		player.init_from_random()
+		generation.append([player, 0])
 
-	# Play
-	(winner, result) = board.autoPlay(player1, player2)
-		
-	board.display()
-	print (result)
+	# Everyone plays against each other
+	# Winner earn a point
+	for x in xrange(0,generation.__len__()):
+		for y in xrange(x+1,generation.__len__()):
+			board.clear()
+			(winner, result) = board.autoPlay(generation[x][0], generation[y][0])
+			board.display()
+			print(result)
+			if winner == generation[x][0]:
+				generation[x][1] = generation[x][1] + 1
+			else:
+				generation[y][1] = generation[y][1] + 1
 
-	child = Player(session)
-	child.init_from_parents(player1, player2)
+	# Display results
+	for x in xrange(0,generation.__len__()):
+		print ("Player n°", x, "scores ", generation[x][1])
 
-
+	#child = Player(session)
+	#child.init_from_parents(player1, player2)
 
 if __name__ == "__main__":
 	main()
