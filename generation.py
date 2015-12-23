@@ -38,9 +38,13 @@ class Generation():
 				if winner == self.generation[x][0]:
 					self.generation[x][1] = self.generation[x][1] + (0.1 * moves) + 0.5
 					self.generation[y][1] = self.generation[y][1] + (0.1 * moves)
-				else:
+				elif winner == self.generation[y][0]:
 					self.generation[x][1] = self.generation[x][1] + (0.1 * moves)
 					self.generation[y][1] = self.generation[y][1] + (0.1 * moves) + 0.5
+				else:
+					# We have a draw game, each player earns max moves and a little bonus
+					self.generation[x][1] = self.generation[x][1] + (0.1 * moves) + 0.25
+					self.generation[y][1] = self.generation[y][1] + (0.1 * moves) + 0.25
 
 	def sort_by_score(self):
 		# Order players in the current generation by score

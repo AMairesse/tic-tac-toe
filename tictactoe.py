@@ -26,7 +26,8 @@ class TicTacToe():
 	#  - number of turns played
 	#  - the win condition (text to display)
 	def autoPlay(self, playerX, playerO):
-		while True:
+		# Play the 8 first moves
+		for x in xrange(0,4):
 			# Player 'X' plays
 			(x, y) = playerX.play(self.readBoard())
 			valid_move = self.play('X', x, y)
@@ -42,6 +43,16 @@ class TicTacToe():
 				return (playerX, self.moves, "O made an invalid move")
 			elif self.isThereWinner() != None :
 				return (playerO, self.moves, "Game won by O")
+
+		# Play the last move
+		(x, y) = playerX.play(self.readBoard())
+		valid_move = self.play('X', x, y)
+		if not valid_move:
+			return (playerO, self.moves, "X made an invalid move")
+		elif self.isThereWinner() != None :
+			return (playerX, self.moves, "Game won by X")
+		else:
+			return (None, self.moves, "Draw game")
 
 	# Make a move on the board
 	def play(self, sign, x, y):
