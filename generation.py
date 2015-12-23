@@ -30,15 +30,17 @@ class Generation():
 		for x in xrange(0,self.generation.__len__()):
 			for y in xrange(x+1,self.generation.__len__()):
 				self.board.clear()
-				(winner, result) = self.board.autoPlay(self.generation[x][0], self.generation[y][0])
+				(winner, moves, result) = self.board.autoPlay(self.generation[x][0], self.generation[y][0])
 				if display:
 					print (x, "playing against", y)
 					self.board.display()
 					print(result)
 				if winner == self.generation[x][0]:
-					self.generation[x][1] = self.generation[x][1] + 1
+					self.generation[x][1] = self.generation[x][1] + (0.1 * moves) + 0.5
+					self.generation[y][1] = self.generation[y][1] + (0.1 * moves)
 				else:
-					self.generation[y][1] = self.generation[y][1] + 1
+					self.generation[x][1] = self.generation[x][1] + (0.1 * moves)
+					self.generation[y][1] = self.generation[y][1] + (0.1 * moves) + 0.5
 
 	def sort_by_score(self):
 		# Order players in the current generation by score
@@ -47,7 +49,7 @@ class Generation():
 	def demo(self):
 		# Play a board game between the first ones to see progress
 		self.board.clear()
-		(winner, result) = self.board.autoPlay(self.generation[0][0], self.generation[1][0])
+		(winner, moves, result) = self.board.autoPlay(self.generation[0][0], self.generation[1][0])
 		self.board.display()
 		print(result)
 
@@ -77,7 +79,7 @@ def main ():
 	session = tf.InteractiveSession()
 
 	# Create a generation of players (each with a score)
-	g = Generation(15, session)
+	g = Generation(16, session)
 
 	for x in xrange(0,10):
 		# Let the current generation play
@@ -87,7 +89,6 @@ def main ():
 		g.demo()
 		# Evolve to next generation
 		g.evolve(display=True)
-		print ("Number of variables in the session :", tf.all_variables().__len__())
 
 	g.play()
 	g.sort_by_score()

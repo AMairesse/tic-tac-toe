@@ -1,4 +1,3 @@
-* Change scoring : playing more turn should give points, for example 0.1 point for each turn played + 0.5 bonus for the winner
 * Save the best player of the last generation
 * Allow for human playing against a saved AI opponent
 * Log results to file instead of stdout, with periodic flushing

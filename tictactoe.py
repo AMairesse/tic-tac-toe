@@ -9,33 +9,39 @@ class TicTacToe():
 	"""docstring for ClassName"""
 
 	# Public attribute
+	moves = 0
 	board = [[0,0,0],
 			 [0,0,0],
 			 [0,0,0]]
 
 	# Clear the board for a new game
 	def clear(self):
+		self.moves = 0
 		self.board = [[0,0,0],
 					  [0,0,0],
 					  [0,0,0]]
 
-	# Autoplay two AI and return the winner (and the win condition)
+	# Autoplay two AI and return :
+	#  - the winner
+	#  - number of turns played
+	#  - the win condition (text to display)
 	def autoPlay(self, playerX, playerO):
 		while True:
 			# Player 'X' plays
 			(x, y) = playerX.play(self.readBoard())
 			valid_move = self.play('X', x, y)
 			if not valid_move:
-				return (playerO, "X made an invalid move")
+				return (playerO, self.moves, "X made an invalid move")
 			elif self.isThereWinner() != None :
-				return (playerX, "Game won by X")
+				return (playerX, self.moves, "Game won by X")
+
 			# Player 'O' plays
 			(x, y) = playerO.play(self.readBoard())
 			valid_move = self.play('O', x, y)
 			if not valid_move:
-				return (playerX, "O made an invalid move")
+				return (playerX, self.moves, "O made an invalid move")
 			elif self.isThereWinner() != None :
-				return (playerO, "Game won by O")
+				return (playerO, self.moves, "Game won by O")
 
 	# Make a move on the board
 	def play(self, sign, x, y):
@@ -48,6 +54,7 @@ class TicTacToe():
 			self.board[x][y] = -1
 		else:
 			return False
+		self.moves = self.moves + 1
 		return True
 
 	# Print the board on the screen
