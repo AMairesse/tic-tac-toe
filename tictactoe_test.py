@@ -107,7 +107,7 @@ class TicTacToetestCase(unittest.TestCase):
 		self.game.clear()
 		self.game.play('O', 0, 0)
 		self.game.play('X', 2, 2)
-		self.assertEqual(self.game.readBoard(), [[-1, 0, 0, 0, 0, 0, 0, 0, 1]])
+		self.assertEqual(self.game.readBoard(), [[0.5, 0, 0, 0, 0, 0, 0, 0, 1]])
 
 if __name__ == '__main__':
     unittest.main()

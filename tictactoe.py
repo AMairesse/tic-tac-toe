@@ -65,11 +65,19 @@ class TicTacToe():
 			print ("|")
 		print("-------")
 
-	# Export the board in a single row (for AI players)
+	# Export the board in a single row and
+	# values between 0 and 1(for AI players)
 	def readBoard(self):
-		return ([[self.board[0][0], self.board[0][1], self.board[0][2],
-				  self.board[1][0], self.board[1][1], self.board[1][2],
-				  self.board[2][0], self.board[2][1], self.board[2][2]]])
+		result = []
+		for x in xrange(0,3):
+			for y in xrange(0,3):
+				if self.board[x][y] == 0:
+					result.append(0)
+				elif self.board[x][y] == -1:
+					result.append(0.5)
+				else:
+					result.append(1)
+		return ([result])
 
 	# Check if there is a winner and return which sign won
 	def isThereWinner(self):
