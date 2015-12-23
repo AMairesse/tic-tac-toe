@@ -66,10 +66,7 @@ class Generation():
 		# Start by the end and replace starting with the last one
 		for x in xrange(0,generation_length/2):
 			self.generation[generation_length-1-x][0].init_from_parents(self.generation[generation_length-1-(2*x)][0], self.generation[generation_length-2-(2*x)][0])
-		# Second quater of new generation is made random
-		for x in xrange(generation_length/4,generation_length/2):
-			self.generation[x][0].init_from_random()
-		# First quater of new generation is made from best ones from previous generation untouched
+		# First half of new generation is made from best ones from previous generation untouched
 		# So we just set the scores to 0 to everyone
 		for x in xrange(0,generation_length):
 			self.generation[x][1] = 0
