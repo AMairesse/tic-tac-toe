@@ -9,10 +9,14 @@ class TicTacToe():
 	"""docstring for ClassName"""
 
 	# Public attribute
-	moves = 0
-	board = [[[0,0,0],
-			  [0,0,0],
-			  [0,0,0]]]
+	moves = None
+	board = None
+
+	def __init__(self):
+		self.moves = 0
+		self.board = [[[0,0,0],
+					  [0,0,0],
+					  [0,0,0]]]
 
 	# Clear the board for a new game
 	def clear(self):
@@ -27,7 +31,7 @@ class TicTacToe():
 	#  - the win condition (text to display)
 	def autoPlay(self, playerX, playerO):
 		# Play the 8 first moves
-		for x in xrange(0,4):
+		for x in range(0,4):
 			# Player 'X' plays
 			(x, y) = playerX.play(self.readBoard())
 			valid_move = self.play('X', x, y)
@@ -73,13 +77,13 @@ class TicTacToe():
 
 	# Print the board on the screen
 	def display(self):
-		for board_number in xrange(1,self.board.__len__()):
+		for board_number in range(1,self.board.__len__()):
 			print("_______  ", end="")
 		print("")
 
-		for x in xrange(3):
-			for board_number in xrange(1,self.board.__len__()):
-				for y in xrange(3):
+		for x in range(3):
+			for board_number in range(1,self.board.__len__()):
+				for y in range(3):
 					print ("|", end="")
 					if self.board[board_number][x][y] == 0:
 						print (" ", end="")
@@ -90,7 +94,7 @@ class TicTacToe():
 				print ("|  ", end="")
 			print("")
 
-		for board_number in xrange(1,self.board.__len__()):
+		for board_number in range(1,self.board.__len__()):
 			print("-------  ", end="")
 		print("")
 
@@ -100,8 +104,8 @@ class TicTacToe():
 		# Take the last version of the board
 		last_move = self.board[-1]
 		result = []
-		for x in xrange(0,3):
-			for y in xrange(0,3):
+		for x in range(0,3):
+			for y in range(0,3):
 				if last_move[x][y] == 0:
 					result.append(0)
 				elif last_move[x][y] == -1:
