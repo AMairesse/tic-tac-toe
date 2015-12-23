@@ -22,6 +22,9 @@ class Player():
 		self.initial_position = tf.placeholder(tf.float64, shape=(1, 9))
 		self.sess = session
 
+	#def __delete__(self):
+	#	pass
+
 	def init_from_random(self):
 		op = self.W.assign(np.random.rand(9,9))
 		self.sess.run(op)

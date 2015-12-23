@@ -60,32 +60,24 @@ class Generation():
 				print(self.generation[x][1], " ", end="")
 			print("***** New generation created *****")
 
-		# Half of new generation is made from 1 with 2, 3 with 4, etc.
+		# Second half of new generation is made from 1 with 2, 3 with 4, etc.
+		# Start by the end and replace starting with the last one
 		for x in xrange(0,generation_length/2):
-			player = Player(self.sess)
-			player.init_from_parents(self.generation[x*2][0], self.generation[x*2+1][0])
-			self.generation.append([player, 0])
-		# Third quater of second generation is made from best ones from previous generation untouched
-		for x in xrange(0,generation_length/4):
-			self.generation.append([self.generation[x][0], 0])		
-		# Last quater of second generation is made random
-		for x in xrange(0,(generation_length*2)-self.generation.__len__()):
-			player = Player(self.sess)
-			player.init_from_random()
-			self.generation.append([player, 0])
-
-		# Remove previous generation
+			self.generation[generation_length-1-x][0].init_from_parents(self.generation[generation_length-1-(2*x)][0], self.generation[generation_length-2-(2*x)][0])
+		# Second quater of new generation is made random
+		for x in xrange(generation_length/4,generation_length/2):
+			self.generation[x][0].init_from_random()
+		# First quater of new generation is made from best ones from previous generation untouched
+		# So we just set the scores to 0 to everyone
 		for x in xrange(0,generation_length):
-			self.generation.pop(0)
-		
-
-
+			self.generation[x][1] = 0
+			
 def main ():
 	# Create a TensorFlow session
 	session = tf.InteractiveSession()
 
 	# Create a generation of players (each with a score)
-	g = Generation(10, session)
+	g = Generation(15, session)
 
 	for x in xrange(0,10):
 		# Let the current generation play
@@ -95,6 +87,7 @@ def main ():
 		g.demo()
 		# Evolve to next generation
 		g.evolve(display=True)
+		print ("Number of variables in the session :", tf.all_variables().__len__())
 
 	g.play()
 	g.sort_by_score()

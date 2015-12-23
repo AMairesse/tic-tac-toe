@@ -4,6 +4,9 @@
 import unittest, tictactoe
 
 class TicTacToetestCase(unittest.TestCase):
+	# Public attribute
+	game = None
+
 	def setUp(self):
 		self.game = tictactoe.TicTacToe()
 
