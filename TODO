@@ -1,3 +1,4 @@
+* Improve TensorFlow management in order to play multiple players in one run
 * Save the best player of the last generation
 * Allow for human playing against a saved AI opponent
 * Log results to file instead of stdout, with periodic flushing
