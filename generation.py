@@ -118,7 +118,7 @@ class Generation():
 			
 def main ():
 	# Create a generation of players (each with a score)
-	g = Generation(50)
+	g = Generation(16)
 
 	for x in range(0,20):
 		# Let the current generation play
@@ -145,6 +145,11 @@ def main ():
 	for x in range(0,g.generation.__len__()):
 		print(g.generation[x][1], " ", end="")
 	print("")
+
+	# Display the best player matrix
+	print ("Best player")
+	print ("W = ", g.generation[0][0].W)
+	print ("b = ", g.generation[0][0].b)
 
 if __name__ == "__main__":
 	main()
