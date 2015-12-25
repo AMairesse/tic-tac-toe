@@ -32,11 +32,20 @@ class Player():
 		y = move%3
 		return (x, y)
 
-	def play(self, game, sess):
-		# Position played is a softmax regression of ( (W * initial_position) + b)
-		board = tf.placeholder(tf.float64, shape=(1, 9))
-		W = tf.placeholder(tf.float64, shape=(9, 9))
-		b = tf.placeholder(tf.float64, shape=(9))
-		calcul = tf.nn.softmax(tf.matmul(board, W) + b)
-		result = sess.run(calcul, feed_dict={board: game, W: self.W, b: self.b})
+	def play(self, game, tf_session = None):
+		if tf_session == None:
+			sess = tf.Session()
+		else:
+			sess = tf_session
+
+		with sess.as_default():
+			# Position played is a softmax regression of ( (W * initial_position) + b)
+			board = tf.placeholder(tf.float64, shape=(1, 9))
+			W = tf.placeholder(tf.float64, shape=(9, 9))
+			b = tf.placeholder(tf.float64, shape=(9))
+			calcul = tf.nn.softmax(tf.matmul(board, W) + b)
+			result = sess.run(calcul, feed_dict={board: game, W: self.W, b: self.b})
+
+		if tf_session == None:
+			sess.close()
 		return self.convert_result(result)

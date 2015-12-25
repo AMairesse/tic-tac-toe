@@ -11,16 +11,22 @@ class GenerationtestCase(unittest.TestCase):
 	# Public attribute
 	session = None
 
+	def setUp(self):
+		# Create a TensorFlow session
+		self.session = tf.InteractiveSession()
+
 	def testNoMemoryLeak(self):
 		# Create a generation of players (each with a score)
 		g = Generation(4)
+		memory_objects_start = tf.all_variables().__len__()
 		# Let the current generation play
-		g.playTournament()
+		g.playTournament(self.session)
 		# Sort the winners
 		g.sort_by_score()
 		# Evolve to next generation
 		g.evolve()
-		self.assertEqual(1, 1)
+		memory_objects_end = tf.all_variables().__len__()
+		self.assertEqual(memory_objects_start, memory_objects_end)
 
 if __name__ == '__main__':
     unittest.main()

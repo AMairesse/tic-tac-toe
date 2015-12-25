@@ -20,74 +20,44 @@ class Generation():
 			player.init_from_random()
 			self.generation.append([player, 0])
 
-	def playTournament(self):
+	def playTournament(self, tf_session = None):
 		# Everyone plays against each other
-		# Winner earn a point
-		sess = tf.Session()
-		with sess.as_default():
+		if tf_session == None:
+			sess = tf.Session()
+		else:
+			sess = tf_session
 
-			# Prepare boards and players numbers
-			tournament = []
+		board = TicTacToe()
+		with sess.as_default():
 			for x in range(0,self.generation.__len__()):
 				for y in range(x+1,self.generation.__len__()):
-					board = TicTacToe()
-					tournament.append([board, x, y, True])
-
-			# Prepare
-			sign = 'X'
-			player_turn = 1
-			player_not_playing = 2
-			Still_running = True
-			# Run the tournament until each game is finished
-			while Still_running:
-				Still_running = False
-
-				for x in range(0,tournament.__len__()):
-					game = tournament[x]
-					if game[3] == True :
-						player = self.generation[game[player_turn]][0]
-						(pos_x, pos_y) = player.play(game[0].readBoard(), sess)
-						allowed_move = game[0].play(sign, pos_x, pos_y)
-						if not allowed_move:
-							# Current player loose, get points to the two players and remove this game from tournament (set last value to False)
-							self.generation[game[player_turn]][1] = self.generation[game[player_turn]][1] + (0.1 * game[0].moves)
-							self.generation[game[player_not_playing]][1] = self.generation[game[player_not_playing]][1] + (0.1 * game[0].moves) + 0.5
-							game[3] = False
-						elif game[0].isThereWinner() != None:
-							# Current player won, get points to the two players and remove this game from tournament (set last value to False)
-							self.generation[game[player_turn]][1] = self.generation[game[player_turn]][1] + (0.1 * game[0].moves) + 0.5
-							self.generation[game[player_not_playing]][1] = self.generation[game[player_not_playing]][1] + (0.1 * game[0].moves)
-							game[3] = False
-						elif game[0].moves == 9:
-							# We have a drawn game, each player earns max moves and a little bonus.
-							# Also remove this game from tournament (set last value to False)
-							self.generation[game[player_turn]][1] = self.generation[game[player_turn]][1] + (0.1 * game[0].moves) + 0.25
-							self.generation[game[player_not_playing]][1] = self.generation[game[player_not_playing]][1] + (0.1 * game[0].moves) + 0.25
-							game[3] = False
-						# else at least one game will still be running
-						else:
-							Still_running = True
-
-				# Revert sign and players turn for next round
-				if sign == 'X':
-					sign = 'O'
-					player_turn = 2
-					player_not_playing = 1
-				else:
-					sign = 'X'
-					player_turn = 1
-					player_not_playing = 2
-		sess.close()
+					[winner, moves, result] = self.playGame(self.generation[x][0], self.generation[y][0], board, sess)
+					if winner == self.generation[x][0]:
+						self.generation[x][1] = self.generation[x][1] + (0.1 * moves)
+						self.generation[y][1] = self.generation[y][1] + (0.1 * moves) + 0.5
+					elif winner == self.generation[y][0]:
+						self.generation[x][1] = self.generation[x][1] + (0.1 * moves) + 0.5
+						self.generation[y][1] = self.generation[y][1] + (0.1 * moves)
+					elif winner == None:
+						# We have a drawn game, each player earns max moves and a little bonus.
+						self.generation[x][1] = self.generation[x][1] + (0.1 * moves) + 0.25
+						self.generation[y][1] = self.generation[y][1] + (0.1 * moves) + 0.25
+					board.clear()
+		# Close TensorFlow session if it was created inside the function
+		if tf_session == None:
+			sess.close()
+		del board
 
 	def sort_by_score(self):
 		# Order players in the current generation by score
 		self.generation.sort(key=operator.itemgetter(1), reverse=True)
 
-
-	def playGame(self, playerX, playerO, board = None, tf_session = None):
+	def playGame(self, playerX, playerO, input_board = None, tf_session = None):
 		# Play a board game between two players
-		if board == None:
+		if input_board == None:
 			board = TicTacToe()
+		else:
+			board = input_board
 
 		if tf_session == None:
 			sess = tf.Session()
@@ -125,6 +95,8 @@ class Generation():
 		# Close TensorFlow session if it was created inside the function
 		if tf_session == None:
 			sess.close()
+		if input_board == None:
+			del board
 
 	def evolve(self, display=False):
 		generation_length = self.generation.__len__()
@@ -146,9 +118,9 @@ class Generation():
 			
 def main ():
 	# Create a generation of players (each with a score)
-	g = Generation(10)
+	g = Generation(50)
 
-	for x in range(0,5):
+	for x in range(0,20):
 		# Let the current generation play
 		g.playTournament()
 		# Sort the winners
@@ -168,7 +140,7 @@ def main ():
 	[a, b, result] = g.playGame(g.generation[0][0], g.generation[1][0], board)
 	board.display()
 	print(result)
-
+	
 	print("Ending scores : ", end="")
 	for x in range(0,g.generation.__len__()):
 		print(g.generation[x][1], " ", end="")
