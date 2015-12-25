@@ -55,8 +55,8 @@ class Player():
 		Atemp = np.ravel(A)
 		result = []
 		for x in range(0,Atemp.__len__()):
-			if random.SystemRandom() <= 0.01:
-				result.append(random.SystemRandom())
+			if random.random() <= 0.01:
+				result.append(random.random())
 			else:
 				result.append(Atemp[x])
 		result = np.array(result).reshape(A.shape)

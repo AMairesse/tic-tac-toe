@@ -3,6 +3,7 @@
 
 # Use "print" in the Python3 way even if used with Python2
 from __future__ import print_function
+from __future__ import division
 import operator
 import tensorflow as tf
 from tictactoe import TicTacToe
@@ -109,7 +110,7 @@ class Generation():
 
 		# Second half of new generation is made from 1 with 2, 3 with 4, etc.
 		# Start by the end and replace starting with the last one
-		for x in range(0,generation_length/2):
+		for x in range(0,generation_length//2):
 			self.generation[generation_length-1-x][0].init_from_parents(self.generation[generation_length-1-(2*x)][0], self.generation[generation_length-2-(2*x)][0])
 		# First half of new generation is made from best ones from previous generation untouched
 		# So we just set the scores to 0 to everyone
@@ -118,9 +119,9 @@ class Generation():
 			
 def main ():
 	# Create a generation of players (each with a score)
-	g = Generation(16)
+	g = Generation(24)
 
-	for x in range(0,20):
+	for x in range(0,50):
 		# Let the current generation play
 		g.playTournament()
 		# Sort the winners
