@@ -13,34 +13,18 @@ class Player():
 	# Public attribute
 	W = None
 	b = None
-	initial_position = None
-	sess = None
 	
-	def __init__(self, session):
-		self.W = tf.Variable(tf.zeros([9,9], tf.float64))
-		self.b = tf.Variable(tf.zeros([9], tf.float64))
-		self.initial_position = tf.placeholder(tf.float64, shape=(1, 9))
-		self.sess = session
-
-	#def __delete__(self):
-	#	pass
+	def __init__(self):
+		self.W = None
+		self.b = None
 
 	def init_from_random(self):
-		op = self.W.assign(np.random.rand(9,9))
-		self.sess.run(op)
-		op = self.b.assign(np.random.rand(9))
-		self.sess.run(op)
+		self.W = np.random.rand(9,9)
+		self.b = np.random.rand(9)
 
 	def init_from_parents(self, player1, player2):
-		op = self.W.assign((player1.W + player2.W) / 2.0)
-		self.sess.run(op)
-		op = self.b.assign((player1.b + player2.b) / 2.0)
-		self.sess.run(op)
-
-	def get_tf_work(self):
-		# Position played is a softmax regression of ( (W * initial_position) + b)
-		calcul = tf.nn.softmax(tf.matmul(self.initial_position, self.W) + self.b)
-		return ([calcul, self.initial_position])
+		self.W = (player1.W + player2.W) / 2.0
+		self.b = (player1.b + player2.b) / 2.0
 
 	def convert_result(self, result):
 		move = result.argmax()
@@ -48,7 +32,11 @@ class Player():
 		y = move%3
 		return (x, y)
 
-	def play(self, board):
-		[calcul, placeholder] = self.get_tf_work()
-		result = self.sess.run(calcul, feed_dict={placeholder: board})
+	def play(self, game, sess):
+		# Position played is a softmax regression of ( (W * initial_position) + b)
+		board = tf.placeholder(tf.float64, shape=(1, 9))
+		W = tf.placeholder(tf.float64, shape=(9, 9))
+		b = tf.placeholder(tf.float64, shape=(9))
+		calcul = tf.nn.softmax(tf.matmul(board, W) + b)
+		result = sess.run(calcul, feed_dict={board: game, W: self.W, b: self.b})
 		return self.convert_result(result)
