@@ -4,6 +4,7 @@
 # Use "print" in the Python3 way even if used with Python2
 from __future__ import print_function
 import copy
+import json
 
 class TicTacToe():
 	"""docstring for ClassName"""
@@ -26,9 +27,12 @@ class TicTacToe():
 					   [0,0,0]]]
 
 	# Make a move on the board
-	def play(self, sign, x, y):
-		# Take the last version of the board
-		new_move = copy.deepcopy(self.board[-1])
+	def play(self, sign, x, y, history = True):
+		if history == True:
+			# Take the last version of the board
+			new_move = copy.deepcopy(self.board[-1])
+		else:
+			new_move = self.board[-1]
 		# Check first if the spot if free
 		if new_move[x][y] != 0:
 			return False
@@ -39,7 +43,8 @@ class TicTacToe():
 		else:
 			return False
 		self.moves = self.moves + 1
-		self.board.append(new_move)
+		if history == True:
+			self.board.append(new_move)
 		return True
 
 	# Print the board on the screen
@@ -81,6 +86,15 @@ class TicTacToe():
 					result.append(1)
 		return ([result])
 
+	# Init the board with a saved position
+	def writeBoard(self, data):
+		self.clear()
+		for i in range(0,9):
+			if data[0][i] == 0.5:
+				self.board[-1][i//3][i%3] = -1
+			else:
+				self.board[-1][i//3][i%3] = data[0][i]
+
 	# Check if there is a winner and return which sign won
 	def isThereWinner(self):
 		# Take the last version of the board
@@ -112,3 +126,52 @@ class TicTacToe():
 			return('O')
 		# There is no winner
 		return(None)
+
+	# Return the best theorical move
+	def best_move(self, weigth, deep):
+		if deep == 0:
+			pass
+		return (x,y)
+
+def recurs_move(f, board, x, y, sign):
+	# Play the move
+	result = board.play(sign, x, y, False)
+	# If the move is invalid, we exit
+	if result == False:
+		return True
+	# Write the current board status in the file
+	f.write(json.dumps(board.readBoard()))
+	f.write("\n")
+	# If there is a winner, we exit
+	if board.isThereWinner() != None:
+		return True
+	if sign == 'X':
+		sign = 'O'
+	else:
+		sign = 'X'
+	# Play every other moves
+	saved_board = board.readBoard()
+	for new_x in range(0,3):
+		for new_y in range(0,3):
+			if board.board[-1][new_x][new_y] == 0:
+				recurs_move(f, board, new_x, new_y, sign)
+				board.writeBoard(saved_board)
+	return True
+
+def main ():
+	# Open file
+	f = open('boards_list.txt', 'w')
+	board = TicTacToe()
+	recurs_move(f, board, 0, 0, 'X')
+#	recurs_move(f, board, 0, 1, 'X')
+#	recurs_move(f, board, 0, 2, 'X')
+#	recurs_move(f, board, 1, 0, 'X')
+#	recurs_move(f, board, 1, 1, 'X')
+#	recurs_move(f, board, 1, 2, 'X')
+#	recurs_move(f, board, 2, 0, 'X')
+#	recurs_move(f, board, 2, 1, 'X')
+#	recurs_move(f, board, 2, 2, 'X')
+
+if __name__ == "__main__":
+	main()
+
