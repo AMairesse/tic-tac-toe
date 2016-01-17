@@ -1,4 +1,0 @@
-#!/bin/bash
-python generation_test.py
-python tictactoe_test.py
-
