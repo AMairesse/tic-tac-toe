@@ -163,7 +163,7 @@ def main ():
 	f = open('boards_list.txt', 'w')
 	board = TicTacToe()
 	recurs_move(f, board, 0, 0, 'X')
-#	recurs_move(f, board, 0, 1, 'X')
+	recurs_move(f, board, 0, 1, 'X')
 #	recurs_move(f, board, 0, 2, 'X')
 #	recurs_move(f, board, 1, 0, 'X')
 #	recurs_move(f, board, 1, 1, 'X')
