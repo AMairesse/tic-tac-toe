@@ -198,5 +198,5 @@ if __name__ == "__main__":
 
 		# Save trained player
 		f = cmdline_args['player_file']
-		self.save(f)
+		p.save(f)
 		f.close()
