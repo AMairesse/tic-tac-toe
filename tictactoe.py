@@ -3,8 +3,10 @@
 
 # Use "print" in the Python3 way even if used with Python2
 from __future__ import print_function
+from operator import itemgetter
 import copy
 import json
+import argparse
 
 class TicTacToe():
 	"""docstring for ClassName"""
@@ -49,12 +51,19 @@ class TicTacToe():
 
 	# Print the board on the screen
 	def display(self):
-		for board_number in range(1,self.board.__len__()):
+		# Display the first board if there is only one
+		# Otherwise it is not usefull
+		if self.board.__len__() == 1:
+			index = 0
+		else:
+			index = 1
+
+		for board_number in range(index,self.board.__len__()):
 			print("_______  ", end="")
 		print("")
 
 		for x in range(3):
-			for board_number in range(1,self.board.__len__()):
+			for board_number in range(index,self.board.__len__()):
 				for y in range(3):
 					print ("|", end="")
 					if self.board[board_number][x][y] == 0:
@@ -66,7 +75,7 @@ class TicTacToe():
 				print ("|  ", end="")
 			print("")
 
-		for board_number in range(1,self.board.__len__()):
+		for board_number in range(index,self.board.__len__()):
 			print("-------  ", end="")
 		print("")
 
@@ -128,50 +137,132 @@ class TicTacToe():
 		return(None)
 
 	# Return the best theorical move
-	def best_move(self, weigth, deep):
-		if deep == 0:
-			pass
-		return (x,y)
+	def best_move(self, playing_sign):
+		result = []
+		for x in range(0,3):
+			for y in range(0,3):
+				if self.board[-1][x][y] == 0:
+					score = self.score(x, y, playing_sign)
+					result.append([x,y,score])
+		if result == []:
+			return (None, None)
+		else:
+			result.sort(key=itemgetter(2), reverse=True)
+			return (result[0][0], result[0][1])
 
-def recurs_move(f, board, x, y, sign):
-	# Play the move
-	result = board.play(sign, x, y, False)
-	# If the move is invalid, we exit
-	if result == False:
-		return True
-	# Write the current board status in the file
-	f.write(json.dumps(board.readBoard()))
-	f.write("\n")
-	# If there is a winner, we exit
-	if board.isThereWinner() != None:
-		return True
-	if sign == 'X':
-		sign = 'O'
-	else:
-		sign = 'X'
-	# Play every other moves
-	saved_board = board.readBoard()
-	for new_x in range(0,3):
-		for new_y in range(0,3):
-			if board.board[-1][new_x][new_y] == 0:
-				recurs_move(f, board, new_x, new_y, sign)
-				board.writeBoard(saved_board)
-	return True
+	def score(self, x, y, winner_sign, playing_sign = None, score = 0, deep = 1.0):
+		# Default playing_sign to winner_sign
+		if playing_sign == None:
+			playing_sign = winner_sign
+		# Create a working board from the current one
+		working_board = TicTacToe()
+		working_board.writeBoard(self.readBoard())
+		# Play the move
+		result = working_board.play(playing_sign, x, y, False)
+		# If the move is invalid, we exit with score - 1
+		if result == False:
+			return (score - 1 * deep)
+		# If there is a winner, we exit with score + 2
+		if working_board.isThereWinner() != None:
+			if winner_sign == playing_sign:
+				return (score + 2 * deep)
+			else:
+				return (score - 2 * deep)
+		if playing_sign == 'X':
+			new_playing_sign = 'O'
+		else:
+			new_playing_sign = 'X'
+		# Play every other moves
+		saved_board = working_board.readBoard()
+		temp_score = 0
+		for new_x in range(0,3):
+			for new_y in range(0,3):
+				if working_board.board[-1][new_x][new_y] == 0:
+					temp_score = working_board.score(new_x, new_y, winner_sign, new_playing_sign, temp_score, deep / 2)
+					working_board.writeBoard(saved_board)
+		return (score + temp_score * deep)
 
-def main ():
-	# Open file
-	f = open('boards_list.txt', 'w')
-	board = TicTacToe()
-	recurs_move(f, board, 0, 0, 'X')
-	recurs_move(f, board, 0, 1, 'X')
-#	recurs_move(f, board, 0, 2, 'X')
-#	recurs_move(f, board, 1, 0, 'X')
-#	recurs_move(f, board, 1, 1, 'X')
-#	recurs_move(f, board, 1, 2, 'X')
-#	recurs_move(f, board, 2, 0, 'X')
-#	recurs_move(f, board, 2, 1, 'X')
-#	recurs_move(f, board, 2, 2, 'X')
+	def play_a_game(self):
+		while self.moves <= 9:
+			self.display()
+			while True:
+				x_str = input("Line ? ")
+				y_str = input("Column ? ")
+				played = self.play('X', int(x_str), int(y_str))
+				if played:
+					break
+				else:
+					print("Bad input, please retry.")
+			self.display()
+			if self.isThereWinner() != None:
+				print("You win !")
+				break
+			else:
+				(x, y) = self.best_move('O')
+				if x == None:
+					# No more solutions
+					break
+				else:
+					self.play('O', x, y)
+					if self.isThereWinner() != None:
+						self.display()
+						print("You lose !")
+						break
+
+	def recurs_move(self, f, x = None, y = None, sign = 'X'):
+		# Create a working board from the current one
+		working_board = TicTacToe()
+		working_board.writeBoard(self.readBoard())
+		# If called without values then scan all availables combinations
+		if ((x == None) and (y == None)):
+			for x in range(0,3):
+				for y in range(0,3):
+					working_board.recurs_move(f, x, y, sign)
+			return True
+		# Play the move for the current player
+		result = working_board.play(sign, x, y, False)
+		# If the move is invalid, we exit
+		if result == False:
+			return True
+		# Change current player
+		if sign == 'X':
+			sign = 'O'
+		else:
+			sign = 'X'
+		# Get the next best move
+		(best_x, best_y) = working_board.best_move(sign)
+		# If there is no more available moves we exit
+		if best_x == None:
+			return True
+		# Write the current board status in the file
+		result = working_board.readBoard()
+		result.append(best_x*3+best_y)
+		f.write(json.dumps(result))
+		f.write("\n")
+		# If there is a winner, we exit
+		if working_board.isThereWinner() != None:
+			return True
+		# Play every other moves
+		saved_board = working_board.readBoard()
+		for new_x in range(0,3):
+			for new_y in range(0,3):
+				if working_board.board[-1][new_x][new_y] == 0:
+					working_board.recurs_move(f, new_x, new_y, sign)
+					working_board.writeBoard(saved_board)
+		return True
+
+
+parser = argparse.ArgumentParser(description='Play TicTacToe')
+parser.add_argument('action', choices=['play', 'file_export'])
 
 if __name__ == "__main__":
-	main()
-
+	args = parser.parse_args()
+	cmdline_args = vars(args)
+	if (cmdline_args['action'] == 'play'):
+		board = TicTacToe()
+		board.play_a_game()
+	elif (cmdline_args['action'] == 'file_export'):
+		f = open('work_file/boards_list.txt', 'w')
+		board = TicTacToe()
+		board.recurs_move(f)
+		f.close()
