@@ -253,7 +253,13 @@ class TicTacToe():
 
 
 parser = argparse.ArgumentParser(description='Play TicTacToe')
-parser.add_argument('action', choices=['play', 'file_export'])
+subparsers = parser.add_subparsers(dest='action')
+# create the parser for the "play" command
+parser_learn = subparsers.add_parser('play')
+# create the parser for the "solve" command
+parser_solve = subparsers.add_parser('solve')
+parser_solve.add_argument('--export-file', type=argparse.FileType('w'), required=True)
+
 
 if __name__ == "__main__":
 	args = parser.parse_args()
@@ -261,8 +267,8 @@ if __name__ == "__main__":
 	if (cmdline_args['action'] == 'play'):
 		board = TicTacToe()
 		board.play_a_game()
-	elif (cmdline_args['action'] == 'file_export'):
-		f = open('work_file/boards_list.txt', 'w')
+	elif (cmdline_args['action'] == 'solve'):
+		f = cmdline_args['export_file']
 		board = TicTacToe()
 		board.recurs_move(f)
 		f.close()
