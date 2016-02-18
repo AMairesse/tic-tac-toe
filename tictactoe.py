@@ -182,7 +182,7 @@ class TicTacToe():
 					working_board.writeBoard(saved_board)
 		return (score + temp_score * deep)
 
-	def play_a_game(self):
+	def play_a_game(self, player = None):
 		while self.moves <= 9:
 			self.display()
 			while True:
@@ -198,12 +198,19 @@ class TicTacToe():
 				print("You win !")
 				break
 			else:
-				(x, y) = self.best_move('O')
+				if player == None:
+					# Brute force playing
+					(x, y) = self.best_move('O')
+				else:
+					(x, y) = player.play(self.readBoard())
 				if x == None:
 					# No more solutions
 					break
 				else:
-					self.play('O', x, y)
+					is_valid_move = self.play('O', x, y)
+					if not is_valid_move:
+						# AI player made an invalid move, human player win
+						print("AI made an invalid move. You win !")
 					if self.isThereWinner() != None:
 						self.display()
 						print("You lose !")
@@ -256,6 +263,7 @@ parser = argparse.ArgumentParser(description='Play TicTacToe')
 subparsers = parser.add_subparsers(dest='action')
 # create the parser for the "play" command
 parser_learn = subparsers.add_parser('play')
+parser_learn.add_argument('--player-file', type=argparse.FileType('r'), required=False)
 # create the parser for the "solve" command
 parser_solve = subparsers.add_parser('solve')
 parser_solve.add_argument('--export-file', type=argparse.FileType('w'), required=True)
@@ -266,7 +274,14 @@ if __name__ == "__main__":
 	cmdline_args = vars(args)
 	if (cmdline_args['action'] == 'play'):
 		board = TicTacToe()
-		board.play_a_game()
+		player_file = cmdline_args['player_file']
+		if player_file != None:
+			from player import Player
+			p = Player()
+			p.load(player_file)
+		else:
+			p=None
+		board.play_a_game(p)
 	elif (cmdline_args['action'] == 'solve'):
 		f = cmdline_args['export_file']
 		board = TicTacToe()

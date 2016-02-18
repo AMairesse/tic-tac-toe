@@ -41,6 +41,24 @@ class Player():
 			self.W = self.mutation((player1.W + player2.W) / 2.0)
 			self.b = self.mutation((player1.b + player2.b) / 2.0)
 			
+	def load(self, f):
+		try:
+			data = f.readlines()
+			self.W = ast.literal_eval(data[0])
+			self.b = ast.literal_eval(data[1])
+		except:
+			return False
+		return True
+
+	def save(self, f):
+		try:
+			f.write(json.dumps(self.W))
+			f.write("\n")
+			f.write(json.dumps(self.b))
+		except:
+			return False
+		return True
+
 
 	def mergeArrays(self, A, B):
 		Atemp = np.ravel(A)
@@ -180,7 +198,5 @@ if __name__ == "__main__":
 
 		# Save trained player
 		f = cmdline_args['player_file']
-		f.write(json.dumps(p.W))
-		f.write("\n")
-		f.write(json.dumps(p.b))
+		self.save(f)
 		f.close()
