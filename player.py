@@ -11,6 +11,9 @@ import ast
 import argparse
 import json
 
+# Constants (ok, not a constant for Python but anyway that's the idea)
+BATCH_SIZE = 1000
+
 class Player():
 	"""docstring for Player"""
 
@@ -116,8 +119,7 @@ class Player():
 			if index == None:
 				line_nb = random.randint(0, data_size - 1)
 			else:
-				line_nb = index
-				index = index + 1
+				line_nb = index + x
 			line = ast.literal_eval(data[line_nb])
 			batch_xs.append(line[0])
 			ys = [0., 0., 0., 0., 0., 0., 0., 0., 0.]
@@ -126,7 +128,7 @@ class Player():
 		return batch_xs, batch_ys
 
 
-	def learn(self, data, deep, verbose = False, tf_session = None):
+	def learn(self, data, deep, not_random = False, verbose = False, tf_session = None):
 		if tf_session == None:
 			sess = tf.Session()
 		else:
@@ -151,21 +153,24 @@ class Player():
 			# Start training
 			for i in range(0, deep):
 				# Read a batch of values and train
-				batch_xs, batch_ys = self.get_learning_batch(data, 1000, i)
+				if not_random:
+					batch_xs, batch_ys = self.get_learning_batch(data, BATCH_SIZE, i*BATCH_SIZE)
+				else:
+					batch_xs, batch_ys = self.get_learning_batch(data, BATCH_SIZE)
 				sess.run(train_step, feed_dict={board: batch_xs, y_: batch_ys})
+				# If verbose mode then print accuracy level for each batch
+				if verbose and ((i+1)%10 == 0):
+					print("Trained batch n°", i+1)
+					correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(y_,1))
+					accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+					batch_xs, batch_ys = self.get_learning_batch(data, 100)
+					print("Player accuracy : ", sess.run(accuracy, feed_dict={board: batch_xs, y_: batch_ys}))
 
 			# Save our "brain"
 			array = sess.run(W)
 			self.W = array.tolist()
 			array = sess.run(b)
 			self.b = array.tolist()
-
-			# If verbose mode then print accuracy level
-			if verbose:
-				correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(y_,1))
-				accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-				batch_xs, batch_ys = self.get_learning_batch(data, 100)
-				print("Player accuracy : ", sess.run(accuracy, feed_dict={board: batch_xs, y_: batch_ys}))
 
 		if tf_session == None:
 			sess.close()
@@ -179,6 +184,7 @@ parser_learn.add_argument('--learn-file', type=argparse.FileType('r'), required=
 parser_learn.add_argument('--player-file', type=argparse.FileType('w'), required=True)
 parser_learn.add_argument('--deep', type=int, default=2)
 parser_learn.add_argument('-v', action='store_true')
+parser_learn.add_argument('--not-random', action='store_true')
 
 
 if __name__ == "__main__":
@@ -193,8 +199,15 @@ if __name__ == "__main__":
 		# Create a player and teach it
 		p = Player()
 		deep = cmdline_args['deep']
+		not_random = cmdline_args['not_random']
+		# if not_random then check deep size
+		if not_random:
+			max_size = data.__len__()
+			if deep * BATCH_SIZE >= max_size:
+				print("Error : deep is too high for '--not-random' mode.")
+				exit()
 		verbose = cmdline_args['v']
-		p.learn(data, deep, verbose)
+		p.learn(data, deep, not_random = not_random, verbose = verbose)
 
 		# Save trained player
 		f = cmdline_args['player_file']
