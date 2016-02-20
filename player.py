@@ -136,20 +136,41 @@ class Player():
 
 		with sess.as_default():
 			# Placeholders for the board and our "brain"
-			board = tf.placeholder(tf.float32, [None, 9])
-			W = tf.Variable(tf.zeros([9, 9]))
-			b = tf.Variable(tf.zeros([9]))
+			board = tf.placeholder(tf.float32, [None, 9], name="x-input")
+			W = tf.Variable(tf.zeros([9, 9]), name="weights")
+			b = tf.Variable(tf.zeros([9]), name="bias")
 			# Build our brain
-			y = tf.nn.softmax(tf.matmul(board, W) + b)
+			# Use a name scope to organize nodes in the graph visualizer
+			with tf.name_scope("Wx_b") as scope:
+				y = tf.nn.softmax(tf.matmul(board, W) + b)
+			# Add summary ops to collect data
+			w_hist = tf.histogram_summary("weights", W)
+			b_hist = tf.histogram_summary("biases", b)
+			y_hist = tf.histogram_summary("y", y)
 			# Placeholder for the real moves we want our brain to obtain
-			y_ = tf.placeholder(tf.float32, [None, 9])
-			# Learning function we will apply (the error between our brain result and optimal result)
-			cross_entropy = -tf.reduce_sum(y_*tf.log(y))
-			# A step of training is to minimize cross_entropy by 1%
-			train_step = tf.train.GradientDescentOptimizer(0.01).minimize(cross_entropy)
+			y_ = tf.placeholder(tf.float32, [None, 9], name="y-input")
+
+			# More name scopes will clean up the graph representation
+			with tf.name_scope("xent") as scope:
+				# Learning function we will apply (the error between our brain result and optimal result)
+				cross_entropy = -tf.reduce_sum(y_*tf.log(y))
+				ce_summ = tf.scalar_summary("cross entropy", cross_entropy)
+			with tf.name_scope("train") as scope:
+				# A step of training is to minimize cross_entropy by 1%
+				train_step = tf.train.GradientDescentOptimizer(0.01).minimize(cross_entropy)
+
+			with tf.name_scope("test") as scope:
+				correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(y_,1))
+				accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+				accuracy_summary = tf.scalar_summary("accuracy", accuracy)
+
+			# Merge all the summaries and write them out to /tmp/mnist_logs
+			merged = tf.merge_all_summaries()
+			writer = tf.train.SummaryWriter("/tmp/tictactoe_logs", sess.graph_def)
+
 			# Initialize all variables
-			init = tf.initialize_all_variables()
-			sess.run(init)
+			tf.initialize_all_variables().run()
+
 			# Start training
 			for i in range(0, deep):
 				# Read a batch of values and train
@@ -159,12 +180,13 @@ class Player():
 					batch_xs, batch_ys = self.get_learning_batch(data, BATCH_SIZE)
 				sess.run(train_step, feed_dict={board: batch_xs, y_: batch_ys})
 				# If verbose mode then print accuracy level for each batch
-				if verbose and ((i+1)%10 == 0):
-					print("Trained batch n°", i+1)
-					correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(y_,1))
-					accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+				if verbose and (i % 10 == 0):
 					batch_xs, batch_ys = self.get_learning_batch(data, 100)
-					print("Player accuracy : ", sess.run(accuracy, feed_dict={board: batch_xs, y_: batch_ys}))
+					result = sess.run([merged, accuracy], feed_dict={board: batch_xs, y_: batch_ys})
+					summary_str = result[0]
+					acc = result[1]
+					writer.add_summary(summary_str, i)
+					print("Accuracy at step %s: %s" % (i, acc))
 
 			# Save our "brain"
 			array = sess.run(W)
