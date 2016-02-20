@@ -198,23 +198,23 @@ class TicTacToe():
 				print("You win !")
 				break
 			else:
+				if self.moves == 9:
+					# Board is full
+					break
 				if player == None:
 					# Brute force playing
 					(x, y) = self.best_move('O')
 				else:
 					(x, y) = player.play(self.readBoard())
-				if x == None:
-					# No more solutions
+				is_valid_move = self.play('O', x, y)
+				if not is_valid_move:
+					# AI player made an invalid move, human player win
+					print("AI made an invalid move. You win !")
 					break
-				else:
-					is_valid_move = self.play('O', x, y)
-					if not is_valid_move:
-						# AI player made an invalid move, human player win
-						print("AI made an invalid move. You win !")
-					if self.isThereWinner() != None:
-						self.display()
-						print("You lose !")
-						break
+				if self.isThereWinner() != None:
+					self.display()
+					print("You lose !")
+					break
 
 	def solve(self, boards, best_moves, x = None, y = None, sign = 'X'):
 		# Create a working board from the current one
