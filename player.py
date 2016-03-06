@@ -134,6 +134,14 @@ class Player():
 		else:
 			sess = tf_session
 
+		# Split data between training_data and validation_data
+		training_data = data[:]
+		validation_data = []
+		validation_size = data.__len__()//10
+		for i in range(0, validation_size):
+			j = random.randint(0, training_data.__len__() - 1)
+			validation_data.append(training_data.pop(j))
+
 		with sess.as_default():
 			# Placeholders for the board and our "brain"
 			board = tf.placeholder(tf.float32, [None, 9], name="x-input")
@@ -175,13 +183,13 @@ class Player():
 			for i in range(0, deep):
 				# Read a batch of values and train
 				if not_random:
-					batch_xs, batch_ys = self.get_learning_batch(data, BATCH_SIZE, i*BATCH_SIZE)
+					batch_xs, batch_ys = self.get_learning_batch(training_data, BATCH_SIZE, i*BATCH_SIZE)
 				else:
-					batch_xs, batch_ys = self.get_learning_batch(data, BATCH_SIZE)
+					batch_xs, batch_ys = self.get_learning_batch(training_data, BATCH_SIZE)
 				sess.run(train_step, feed_dict={board: batch_xs, y_: batch_ys})
 				# If verbose mode then print accuracy level for each batch
 				if verbose and (i % 10 == 0):
-					batch_xs, batch_ys = self.get_learning_batch(data, 100)
+					batch_xs, batch_ys = self.get_learning_batch(validation_data, validation_data.__len__(), 0)
 					result = sess.run([merged, accuracy], feed_dict={board: batch_xs, y_: batch_ys})
 					summary_str = result[0]
 					acc = result[1]
