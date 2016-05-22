@@ -20,15 +20,15 @@ class Player():
 	# Public attribute
 	W = None
 	b = None
-	
+
 	def __init__(self):
 		self.W = None
 		self.b = None
 
 	def init_from_random(self):
 		# Randomize between -1 and 1
-		self.W = np.random.rand(9,9)*2-1
-		self.b = np.random.rand(9)*2-1
+		self.W = np.random.uniform(-1,1,(9,9))
+		self.b = np.random.uniform(-1,1,9)
 
 	def init_from_parents(self, player1, player2, mode = "averageAndMutation"):
 		if mode == "average":
@@ -43,7 +43,7 @@ class Player():
 		elif mode == "averageAndMutation":
 			self.W = self.mutation((player1.W + player2.W) / 2.0)
 			self.b = self.mutation((player1.b + player2.b) / 2.0)
-			
+
 	def load(self, f):
 		try:
 			data = f.readlines()
@@ -225,7 +225,7 @@ if __name__ == "__main__":
 		f = cmdline_args['learn_file']
 		data = f.readlines()
 		f.close()
-		
+
 		# Create a player and teach it
 		p = Player()
 		deep = cmdline_args['deep']
