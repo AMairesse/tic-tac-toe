@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/AMairesse/tic-tac-toe.svg?branch=master)](https://travis-ci.org/AMairesse/tic-tac-toe)
+
 #First try at AI using tic-tac-toe game as a usecase
 
 ## What is it ?
